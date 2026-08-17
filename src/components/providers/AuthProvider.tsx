@@ -18,12 +18,14 @@ type AuthState = {
   user: User | null;
   loading: boolean;
   logout: () => Promise<void>;
+  refreshUser: (next: User) => void;
 };
 
 const AuthContext = createContext<AuthState>({
   user: null,
   loading: true,
   logout: async () => {},
+  refreshUser: () => {},
 });
 
 function readCachedUser(): User | null {
@@ -81,6 +83,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     () => ({
       user,
       loading,
+      refreshUser: (next: User) => {
+        sessionStorage.setItem(USER_KEY, JSON.stringify(next));
+        setUser(next);
+      },
       logout: async () => {
         sessionStorage.removeItem(USER_KEY);
         const supabase = createClient();

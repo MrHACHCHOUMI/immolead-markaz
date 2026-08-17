@@ -24,6 +24,13 @@ import { getNavForRole, ROLE_LABELS, type NavItem } from "@/lib/auth/roles";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { prefetchNav } from "@/lib/queries";
+import { createClient } from "@/lib/supabase/client";
+import {
+  AGENCY_EVENT,
+  agencyFromRow,
+  readAgencySettings,
+  writeAgencySettings,
+} from "@/lib/agency-settings";
 
 const ICONS: Record<NavItem["icon"], typeof LayoutDashboard> = {
   "layout-dashboard": LayoutDashboard,
@@ -46,10 +53,34 @@ export function Sidebar() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const [clicked, setClicked] = useState<string | null>(null);
+  const [agency, setAgency] = useState(readAgencySettings);
 
   useEffect(() => {
     setClicked(null);
   }, [pathname]);
+
+  useEffect(() => {
+    function sync() {
+      setAgency(readAgencySettings());
+    }
+    window.addEventListener(AGENCY_EVENT, sync);
+    return () => window.removeEventListener(AGENCY_EVENT, sync);
+  }, []);
+
+  useEffect(() => {
+    const supabase = createClient();
+    void supabase
+      .from("app_settings")
+      .select("*")
+      .eq("id", 1)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (!data) return;
+        const next = agencyFromRow(data);
+        writeAgencySettings(next);
+        setAgency(next);
+      });
+  }, []);
 
   const items = (user ? getNavForRole(user.role) : getNavForRole("super_admin")).filter(
     (item) => item.href !== "/agenda"
@@ -59,9 +90,9 @@ export function Sidebar() {
     <aside className="fixed inset-y-0 left-0 z-40 flex w-60 flex-col border-r border-white/10 bg-[#071510]">
       <div className="border-b border-white/10 px-4 py-4">
         <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#d7b56d]">
-          ImmoLead × Markaz
+          {agency.agency_name}
         </p>
-        <h1 className="mt-1 text-base font-semibold text-white">CRM Commercial</h1>
+        <h1 className="mt-1 text-base font-semibold text-white">{agency.tagline}</h1>
       </div>
 
       <nav className="flex-1 space-y-0.5 overflow-y-auto px-2.5 py-3">

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Plus, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { invalidateCrm } from "@/lib/query-cache";
+import { readAgencySettings } from "@/lib/agency-settings";
 
 export function CreateProjectButton() {
   const router = useRouter();
@@ -13,11 +14,15 @@ export function CreateProjectButton() {
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [commissionDefault, setCommissionDefault] = useState(
+    () => readAgencySettings().default_commission
+  );
 
   useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     if (!open) return;
+    setCommissionDefault(readAgencySettings().default_commission);
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
@@ -172,7 +177,8 @@ export function CreateProjectButton() {
                         step="0.01"
                         min="0"
                         required
-                        defaultValue={5}
+                        defaultValue={commissionDefault}
+                        key={commissionDefault}
                         className="crm-input mt-1"
                       />
                     </label>

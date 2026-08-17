@@ -43,6 +43,7 @@ export function getNavForRole(role: UserRole): NavItem[] {
       { href: "/visites", label: "Visites", icon: "map-pin" },
       { href: "/projets", label: "Projet", icon: "building-2" },
       { href: "/biens", label: "Biens", icon: "home" },
+      { href: "/parametres", label: "Paramètres", icon: "settings" },
     ];
   }
 
@@ -54,6 +55,7 @@ export function getNavForRole(role: UserRole): NavItem[] {
       { href: "/projets", label: "Projet", icon: "building-2" },
       { href: "/biens", label: "Biens", icon: "home" },
       { href: "/ventes", label: "Mes ventes", icon: "badge-dollar-sign" },
+      { href: "/parametres", label: "Paramètres", icon: "settings" },
     ];
   }
 

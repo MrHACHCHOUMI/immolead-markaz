@@ -16,6 +16,7 @@ import {
   type ExpenseRow,
 } from "@/lib/expenses";
 import type { ProjectOption } from "@/lib/queries";
+import { AGENCY_EVENT, readAgencySettings } from "@/lib/agency-settings";
 
 type Props = {
   open: boolean;
@@ -34,8 +35,18 @@ export function ExpenseFormModal({ open, projects, editing, onClose }: Props) {
   const [amountHt, setAmountHt] = useState("");
   const [amountTtc, setAmountTtc] = useState("");
   const [tva, setTva] = useState(true);
+  const [tvaRate, setTvaRate] = useState(() => readAgencySettings().tva_rate);
 
   useEffect(() => setMounted(true), []);
+
+  useEffect(() => {
+    function sync() {
+      setTvaRate(readAgencySettings().tva_rate);
+    }
+    sync();
+    window.addEventListener(AGENCY_EVENT, sync);
+    return () => window.removeEventListener(AGENCY_EVENT, sync);
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -82,7 +93,8 @@ export function ExpenseFormModal({ open, projects, editing, onClose }: Props) {
       setAmountTtc("");
       return;
     }
-    setAmountTtc(String(Math.round(ht * 1.2 * 100) / 100));
+    const rate = readAgencySettings().tva_rate;
+    setAmountTtc(String(Math.round(ht * (1 + rate / 100) * 100) / 100));
   }
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
@@ -262,7 +274,7 @@ export function ExpenseFormModal({ open, projects, editing, onClose }: Props) {
                   applyTva(amountHt, e.target.checked);
                 }}
               />
-              TVA 20 % — calculer le TTC
+              TVA {tvaRate} % — calculer le TTC
             </label>
 
             {tva ? (
