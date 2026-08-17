@@ -70,6 +70,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         prefetchNav("/visites");
         prefetchNav("/ventes");
         prefetchNav("/depenses");
+        prefetchNav("/equipe");
+        prefetchNav("/rapports");
       }
       setLoading(false);
     });

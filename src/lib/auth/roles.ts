@@ -39,17 +39,19 @@ export function getNavForRole(role: UserRole): NavItem[] {
   if (role === "crc") {
     return [
       { href: "/dashboard", label: "Dashboard", icon: "layout-dashboard" },
-      { href: "/leads", label: "Mes leads", icon: "users" },
-      { href: "/appels", label: "Mes appels", icon: "phone" },
-      { href: "/rdv", label: "Mes RDV", icon: "clipboard-list" },
+      { href: "/leads", label: "Leads", icon: "users" },
+      { href: "/visites", label: "Visites", icon: "map-pin" },
+      { href: "/projets", label: "Projet", icon: "building-2" },
+      { href: "/biens", label: "Biens", icon: "home" },
     ];
   }
 
   if (role === "commercial") {
     return [
       { href: "/dashboard", label: "Dashboard", icon: "layout-dashboard" },
-      { href: "/visiteurs", label: "Mes visiteurs", icon: "user-round" },
-      { href: "/prospects", label: "Prospects", icon: "users" },
+      { href: "/leads", label: "Leads", icon: "users" },
+      { href: "/visites", label: "Visites", icon: "map-pin" },
+      { href: "/projets", label: "Projet", icon: "building-2" },
       { href: "/biens", label: "Biens", icon: "home" },
       { href: "/ventes", label: "Mes ventes", icon: "badge-dollar-sign" },
     ];
@@ -64,7 +66,6 @@ export function getNavForRole(role: UserRole): NavItem[] {
     { href: "/visites", label: "Visites", icon: "map-pin" },
     { href: "/ventes", label: "Ventes", icon: "badge-dollar-sign" },
     { href: "/depenses", label: "Dépenses", icon: "receipt" },
-    { href: "/finance", label: "Finance", icon: "wallet" },
     { href: "/equipe", label: "Équipe", icon: "user-cog" },
     { href: "/rapports", label: "Rapports", icon: "bar-chart-3" },
     { href: "/parametres", label: "Paramètres", icon: "settings" },
@@ -73,7 +74,14 @@ export function getNavForRole(role: UserRole): NavItem[] {
 
 export function canAccessPath(role: UserRole, pathname: string): boolean {
   const allowed = getNavForRole(role).map((item) => item.href);
-  if (pathname.startsWith("/leads/")) return allowed.includes("/leads") || allowed.includes("/prospects");
-  if (pathname.startsWith("/projets/")) return isAdminOrAbove(role);
+  if (pathname.startsWith("/leads/")) {
+    return allowed.includes("/leads") || allowed.includes("/prospects");
+  }
+  if (pathname.startsWith("/projets/")) {
+    return allowed.includes("/projets") || isAdminOrAbove(role);
+  }
+  if (pathname === "/visiteurs") return allowed.includes("/visites") || allowed.includes("/visiteurs");
+  if (pathname === "/prospects") return allowed.includes("/leads") || allowed.includes("/prospects");
+  if (pathname === "/finance") return false;
   return allowed.some((href) => pathname === href || pathname.startsWith(`${href}/`));
 }

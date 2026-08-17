@@ -9,6 +9,9 @@ import { PageSkeleton } from "@/components/ui/PageSkeleton";
 import { LeadCrcActions } from "@/components/leads/LeadCrcActions";
 import { LeadCommercialActions } from "@/components/leads/LeadCommercialActions";
 import { LeadStatusQualify } from "@/components/leads/LeadStatusQualify";
+import { LeadCommentBox } from "@/components/leads/LeadCommentBox";
+import { useAuth } from "@/components/providers/AuthProvider";
+import { isAdminOrAbove } from "@/lib/auth/roles";
 import { useCachedQuery } from "@/hooks/useCachedQuery";
 import { loadLeads, loadProjectOptions } from "@/lib/queries";
 import { createClient } from "@/lib/supabase/client";
@@ -20,6 +23,11 @@ import type { Activity, Appointment, LeadCall } from "@/lib/types/database";
 
 export function LeadDetailView() {
   const { id } = useParams<{ id: string }>();
+  const { user } = useAuth();
+  const admin = isAdminOrAbove(user?.role);
+  const isCrc = user?.role === "crc" || admin;
+  const isCommercial = user?.role === "commercial" || admin;
+  const canSell = user?.role === "commercial" || admin;
   const { data: leads = [], loading } = useCachedQuery("leads", loadLeads);
   const { data: projects = [] } = useCachedQuery("project-options", loadProjectOptions);
 
@@ -102,6 +110,7 @@ export function LeadDetailView() {
                 projectId={lead.project_id}
                 status={lead.status}
                 projects={projects}
+                canSell={canSell}
               />
             </div>
             <span className="rounded-full bg-white/5 px-2.5 py-1 text-xs text-white/60">
@@ -184,12 +193,15 @@ export function LeadDetailView() {
           )}
         </section>
 
-        <LeadCrcActions leadId={lead.id} projectId={lead.project_id} />
-        <LeadCommercialActions
-          leadId={lead.id}
-          projectId={lead.project_id}
-          projects={projects}
-        />
+        <LeadCommentBox leadId={lead.id} projectId={lead.project_id} />
+        {isCrc ? <LeadCrcActions leadId={lead.id} projectId={lead.project_id} /> : null}
+        {isCommercial ? (
+          <LeadCommercialActions
+            leadId={lead.id}
+            projectId={lead.project_id}
+            projects={projects}
+          />
+        ) : null}
 
         <section className="crm-panel p-5">
           <h3 className="font-semibold text-white">Timeline complète</h3>

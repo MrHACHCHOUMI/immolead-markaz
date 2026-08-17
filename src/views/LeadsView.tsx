@@ -7,9 +7,15 @@ import { CreateLeadButton } from "@/components/leads/CreateLeadButton";
 import { LeadStatusQualify } from "@/components/leads/LeadStatusQualify";
 import { useCachedQuery } from "@/hooks/useCachedQuery";
 import { loadLeads, loadProjectOptions } from "@/lib/queries";
+import { useAuth } from "@/components/providers/AuthProvider";
+import { isAdminOrAbove } from "@/lib/auth/roles";
 import { LEAD_SOURCE_LABELS } from "@/lib/labels";
 
 export function LeadsView() {
+  const { user } = useAuth();
+  const admin = isAdminOrAbove(user?.role);
+  const canCreate = user?.role === "crc" || admin;
+  const canSell = user?.role === "commercial" || admin;
   const { data: leads = [], loading } = useCachedQuery("leads", loadLeads);
   const { data: projects = [] } = useCachedQuery("project-options", loadProjectOptions);
 
@@ -27,7 +33,7 @@ export function LeadsView() {
       <Topbar
         title="Leads"
         subtitle="Prospects et qualification CRC"
-        actions={<CreateLeadButton projects={projects} />}
+        actions={canCreate ? <CreateLeadButton projects={projects} /> : null}
       />
 
       <div className="space-y-4 p-6">
@@ -40,9 +46,11 @@ export function LeadsView() {
             <div className="flex min-h-[140px] items-center justify-center px-5 text-center text-sm text-white/45">
               <div>
                 Aucun lead.
-                <div className="mt-4 flex justify-center">
-                  <CreateLeadButton projects={projects} />
-                </div>
+                {canCreate ? (
+                  <div className="mt-4 flex justify-center">
+                    <CreateLeadButton projects={projects} />
+                  </div>
+                ) : null}
               </div>
             </div>
           ) : (
@@ -92,6 +100,7 @@ export function LeadsView() {
                           projectId={lead.project_id}
                           status={lead.status}
                           projects={projects}
+                          canSell={canSell}
                         />
                       </td>
                       <td className="max-w-[220px] truncate px-4 py-3 text-white/50">

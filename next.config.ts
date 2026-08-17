@@ -16,7 +16,10 @@ const nextConfig: NextConfig = {
     ];
   },
   async redirects() {
-    return [{ source: "/agenda", destination: "/dashboard", permanent: true }];
+    return [
+      { source: "/agenda", destination: "/dashboard", permanent: true },
+      { source: "/finance", destination: "/depenses", permanent: true },
+    ];
   },
   images: {
     remotePatterns: [

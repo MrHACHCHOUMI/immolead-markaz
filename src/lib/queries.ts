@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/client";
 import { cachedQuery } from "@/lib/query-cache";
 import { decodeExpenseKind, type ExpenseRow } from "@/lib/expenses";
-import type { Expense, Lead, Project, Sale, Unit, Visit } from "@/lib/types/database";
+import type { Expense, Lead, Project, Sale, Unit, User, Visit } from "@/lib/types/database";
 
 export type ProjectOption = { id: string; name: string };
 export type UnitRow = Unit & {
@@ -307,6 +307,46 @@ export function loadExpenses() {
   });
 }
 
+export type TeamMember = User & {
+  projects: { id: string; name: string }[];
+};
+
+export function loadTeam() {
+  return cachedQuery("team", async () => {
+    const [{ data: users, error: userErr }, { data: links, error: linkErr }] =
+      await Promise.all([
+        sb()
+          .from("users")
+          .select("*")
+          .order("created_at", { ascending: false }),
+        sb()
+          .from("project_users")
+          .select("user_id, project_id, projects(id, name)"),
+      ]);
+
+    if (userErr) throw userErr;
+    if (linkErr) throw linkErr;
+
+    const byUser = new Map<string, { id: string; name: string }[]>();
+    for (const row of (links ?? []) as Array<{
+      user_id: string;
+      project_id: string;
+      projects: { id: string; name: string } | { id: string; name: string }[] | null;
+    }>) {
+      const project = Array.isArray(row.projects) ? row.projects[0] : row.projects;
+      if (!project) continue;
+      const list = byUser.get(row.user_id) ?? [];
+      list.push({ id: project.id, name: project.name });
+      byUser.set(row.user_id, list);
+    }
+
+    return ((users ?? []) as User[]).map((user) => ({
+      ...user,
+      projects: byUser.get(user.id) ?? [],
+    })) as TeamMember[];
+  });
+}
+
 export function prefetchNav(href: string) {
   if (href === "/projets" || href === "/biens") {
     void loadProjects();
@@ -323,6 +363,18 @@ export function prefetchNav(href: string) {
   if (href === "/depenses") {
     void loadExpenses();
     void loadProjectOptions();
+  }
+  if (href === "/equipe") {
+    void loadTeam();
+    void loadProjectOptions();
+  }
+  if (href === "/rapports") {
+    void loadLeads();
+    void loadSales();
+    void loadExpenses();
+    void loadVisits();
+    void loadUnits();
+    void loadProjects();
   }
   if (href === "/dashboard") void loadDashboard(true);
 }

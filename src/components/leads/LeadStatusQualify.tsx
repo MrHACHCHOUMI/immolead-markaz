@@ -24,6 +24,7 @@ type Props = {
   projectId: string;
   status: LeadStatus;
   projects: ProjectOption[];
+  canSell?: boolean;
 };
 
 export function LeadStatusQualify({
@@ -31,6 +32,7 @@ export function LeadStatusQualify({
   projectId,
   status,
   projects,
+  canSell = true,
 }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -345,7 +347,7 @@ export function LeadStatusQualify({
               style={{ top: menuPos.top, left: menuPos.left }}
               className="fixed z-[240] w-[180px] rounded-xl border border-white/10 bg-[#0b1c16] py-1 shadow-2xl"
             >
-              {QUALIFY_OPTIONS.map((opt) => (
+              {QUALIFY_OPTIONS.filter((opt) => canSell || opt.value !== "vente").map((opt) => (
                 <button
                   key={opt.value}
                   type="button"

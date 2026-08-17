@@ -5,6 +5,8 @@ import Link from "next/link";
 import { Topbar } from "@/components/layout/Topbar";
 import { PageSkeleton } from "@/components/ui/PageSkeleton";
 import { CreateUnitButton } from "@/components/projects/CreateUnitButton";
+import { useAuth } from "@/components/providers/AuthProvider";
+import { isAdminOrAbove } from "@/lib/auth/roles";
 import { useCachedQuery } from "@/hooks/useCachedQuery";
 import { loadProjectOptions, loadUnits } from "@/lib/queries";
 import { UNIT_STATUS_COLORS, UNIT_STATUS_LABELS } from "@/lib/labels";
@@ -22,6 +24,8 @@ const PROPERTY_LABELS: Record<string, string> = {
 };
 
 export function BiensView() {
+  const { user } = useAuth();
+  const admin = isAdminOrAbove(user?.role);
   const { data: units = [], loading } = useCachedQuery("units", loadUnits);
   const { data: projects = [] } = useCachedQuery("project-options", loadProjectOptions);
   const [type, setType] = useState("");
@@ -68,11 +72,13 @@ export function BiensView() {
         title="Biens"
         subtitle="Appartements, villas, magasins, lots — tous projets"
         actions={
-          <CreateUnitButton
-            projects={projects}
-            redirectTo="/biens"
-            label="Ajouter un bien"
-          />
+          admin ? (
+            <CreateUnitButton
+              projects={projects}
+              redirectTo="/biens"
+              label="Ajouter un bien"
+            />
+          ) : null
         }
       />
 

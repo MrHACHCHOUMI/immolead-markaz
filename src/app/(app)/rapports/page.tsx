@@ -1,10 +1,7 @@
-import { PageShell } from "@/components/layout/PageShell";
+"use client";
+
+import { RapportsView } from "@/views/RapportsView";
 
 export default function RapportsPage() {
-  return (
-    <PageShell
-      title="Rapports"
-      subtitle="Performance projets, CRC et commerciaux"
-    />
-  );
+  return <RapportsView />;
 }
