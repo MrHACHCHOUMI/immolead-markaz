@@ -1,0 +1,138 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #071510;
+  --bg-soft: #0b1c16;
+  --panel: rgba(255, 255, 255, 0.05);
+  --panel-border: rgba(255, 255, 255, 0.1);
+  --text: #f5faf7;
+  --muted: rgba(255, 255, 255, 0.55);
+  --green: #1f8f63;
+  --green-bright: #7ddea8;
+  --gold: #d7b56d;
+  --gold-soft: #c4a35a;
+}
+
+@theme inline {
+  --color-brand-bg: var(--bg);
+  --color-brand-soft: var(--bg-soft);
+  --color-brand-green: var(--green);
+  --color-brand-mint: var(--green-bright);
+  --color-brand-gold: var(--gold);
+  --font-sans: "Segoe UI", "Avenir Next", "Helvetica Neue", ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+@keyframes brand-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes brand-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.brand-spin {
+  animation: brand-spin 1s linear infinite;
+}
+
+.brand-fade-up {
+  animation: brand-fade-up 0.55s ease-out both;
+}
+
+.crm-panel {
+  border: 1px solid var(--panel-border);
+  background: var(--panel);
+  border-radius: 1.25rem;
+  backdrop-filter: blur(12px);
+}
+
+.crm-input {
+  width: 100%;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #0b1c16;
+  padding: 0.7rem 0.9rem;
+  color: white;
+  outline: none;
+}
+
+.crm-input:focus {
+  border-color: rgba(125, 222, 168, 0.55);
+}
+
+.crm-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 1rem;
+  background: linear-gradient(90deg, #1f8f63, #147a52);
+  padding: 0.7rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: white;
+  transition: filter 0.15s ease;
+}
+
+.crm-btn:hover {
+  filter: brightness(1.08);
+}
+
+.crm-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.7rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* Tableaux : au moins 20 lignes visibles, sans scrollbar interne */
+.crm-table-shell {
+  min-height: calc(44px + (20 * 48px));
+  overflow: visible;
+}
+
+.crm-table-shell table {
+  min-width: 100%;
+}
+
+.crm-table-shell tbody tr {
+  height: 48px;
+}
+
+/* Masquer les flèches des champs number */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+

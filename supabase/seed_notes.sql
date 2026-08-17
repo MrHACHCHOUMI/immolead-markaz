@@ -1,0 +1,6 @@
+-- Après avoir créé le premier compte dans Authentication → Users,
+-- promouvoir en super_admin :
+--
+-- update public.users
+-- set role = 'super_admin', full_name = 'Nom Super Admin'
+-- where email = 'admin@immolead.ma';
