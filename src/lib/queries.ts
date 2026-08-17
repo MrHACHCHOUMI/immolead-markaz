@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/client";
 import { cachedQuery } from "@/lib/query-cache";
-import type { Lead, Project, Sale, Unit, Visit } from "@/lib/types/database";
+import { decodeExpenseKind, type ExpenseRow } from "@/lib/expenses";
+import type { Expense, Lead, Project, Sale, Unit, Visit } from "@/lib/types/database";
 
 export type ProjectOption = { id: string; name: string };
 export type UnitRow = Unit & {
@@ -273,6 +274,39 @@ export function loadDashboard(admin: boolean) {
   });
 }
 
+export function loadExpenses() {
+  return cachedQuery("expenses", async () => {
+    const { data, error } = await sb()
+      .from("expenses")
+      .select(
+        "id, project_id, category, description, amount_ht, amount_ttc, expense_date, supplier, document_url, comment, created_by, created_at, projects(id, name)"
+      )
+      .order("expense_date", { ascending: false })
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+
+    return ((data ?? []) as Array<
+      Expense & {
+        projects: { id: string; name: string } | { id: string; name: string }[] | null;
+      }
+    >).map((row) => {
+      const project = Array.isArray(row.projects)
+        ? row.projects[0] ?? null
+        : row.projects ?? null;
+      const decoded = decodeExpenseKind(row.category, row.description ?? "");
+      return {
+        ...row,
+        amount_ht: Number(row.amount_ht),
+        amount_ttc: row.amount_ttc == null ? null : Number(row.amount_ttc),
+        projects: project,
+        kind: decoded.kind,
+        display_description: decoded.description,
+      } as ExpenseRow;
+    });
+  });
+}
+
 export function prefetchNav(href: string) {
   if (href === "/projets" || href === "/biens") {
     void loadProjects();
@@ -286,5 +320,9 @@ export function prefetchNav(href: string) {
   }
   if (href === "/visites" || href === "/visiteurs") void loadVisits();
   if (href === "/ventes") void loadSales();
+  if (href === "/depenses") {
+    void loadExpenses();
+    void loadProjectOptions();
+  }
   if (href === "/dashboard") void loadDashboard(true);
 }

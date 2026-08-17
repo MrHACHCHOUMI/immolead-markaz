@@ -1,10 +1,7 @@
-import { PageShell } from "@/components/layout/PageShell";
+"use client";
+
+import { DepensesView } from "@/views/DepensesView";
 
 export default function DepensesPage() {
-  return (
-    <PageShell
-      title="Dépenses"
-      subtitle="Charges liées aux projets ou générales"
-    />
-  );
+  return <DepensesView />;
 }

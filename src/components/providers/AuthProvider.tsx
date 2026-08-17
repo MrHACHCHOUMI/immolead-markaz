@@ -69,6 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         prefetchNav("/leads");
         prefetchNav("/visites");
         prefetchNav("/ventes");
+        prefetchNav("/depenses");
       }
       setLoading(false);
     });
