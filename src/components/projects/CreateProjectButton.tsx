@@ -101,7 +101,7 @@ export function CreateProjectButton() {
               onClick={() => !loading && setOpen(false)}
             />
 
-            <div className="pointer-events-none absolute inset-0 flex items-center justify-center p-4 md:left-64">
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center p-4 md:left-60">
               <div className="pointer-events-auto flex max-h-[min(90vh,820px)] w-full max-w-lg flex-col overflow-hidden rounded-3xl border border-white/10 bg-[#0b1c16] shadow-2xl shadow-black/50">
                 <div className="flex shrink-0 items-center justify-between border-b border-white/10 px-5 py-4">
                   <h3 className="text-base font-semibold text-white">

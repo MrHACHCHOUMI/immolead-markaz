@@ -110,9 +110,8 @@ body {
   color: rgba(255, 255, 255, 0.85);
 }
 
-/* Tableaux : au moins 20 lignes visibles, sans scrollbar interne */
+/* Tableaux : hauteur selon le contenu, pas 20 lignes vides */
 .crm-table-shell {
-  min-height: calc(44px + (20 * 48px));
   overflow: visible;
 }
 
@@ -121,7 +120,7 @@ body {
 }
 
 .crm-table-shell tbody tr {
-  height: 48px;
+  height: 44px;
 }
 
 /* Masquer les flèches des champs number */

@@ -246,7 +246,7 @@ export function LeadStatusQualify({
               className="absolute inset-0 bg-black/70"
               onClick={() => setSaleOpen(false)}
             />
-            <div className="pointer-events-none absolute inset-0 flex items-center justify-center p-4 md:left-64">
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center p-4 md:left-60">
               <form
                 onSubmit={onSaleSubmit}
                 className="pointer-events-auto w-full max-w-lg space-y-3 rounded-3xl border border-white/10 bg-[#0b1c16] p-5 shadow-2xl"

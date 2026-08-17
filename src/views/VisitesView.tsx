@@ -67,7 +67,7 @@ export function VisitesView() {
 
         <section className="crm-panel overflow-visible p-0">
           {rows.length === 0 ? (
-            <div className="crm-table-shell flex items-center justify-center px-5 text-center text-sm text-white/45">
+            <div className="flex min-h-[140px] items-center justify-center px-5 text-center text-sm text-white/45">
               Aucun lead visité pour le moment.
               <br />
               Qualifie un lead en « Visité » depuis Leads — même sans date de RDV.
@@ -88,13 +88,16 @@ export function VisitesView() {
                 <tbody className="divide-y divide-white/5">
                   {rows.map((visit) => (
                     <tr key={visit.id} className="hover:bg-white/[0.03]">
-                      <td className="px-4 py-3 text-white/70">
-                        {visit.next_action_date
-                          ? new Date(visit.next_action_date).toLocaleString("fr-FR", {
-                              dateStyle: "short",
-                              timeStyle: "short",
-                            })
-                          : "Sans date"}
+                      <td className="whitespace-nowrap px-4 py-3 text-white/70">
+                        {(() => {
+                          const dateValue = visit.next_action_date || visit.created_at;
+                          return dateValue
+                            ? new Date(dateValue).toLocaleString("fr-FR", {
+                                dateStyle: "short",
+                                timeStyle: "short",
+                              })
+                            : "Sans date";
+                        })()}
                       </td>
                       <td className="px-4 py-3 font-medium text-white">
                         <Link

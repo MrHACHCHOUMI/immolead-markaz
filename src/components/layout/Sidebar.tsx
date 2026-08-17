@@ -56,15 +56,15 @@ export function Sidebar() {
   );
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-white/10 bg-[#071510]">
-      <div className="border-b border-white/10 px-5 py-5">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#d7b56d]">
+    <aside className="fixed inset-y-0 left-0 z-40 flex w-60 flex-col border-r border-white/10 bg-[#071510]">
+      <div className="border-b border-white/10 px-4 py-4">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#d7b56d]">
           ImmoLead × Markaz
         </p>
-        <h1 className="mt-1 text-lg font-semibold text-white">CRM Commercial</h1>
+        <h1 className="mt-1 text-base font-semibold text-white">CRM Commercial</h1>
       </div>
 
-      <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
+      <nav className="flex-1 space-y-0.5 overflow-y-auto px-2.5 py-3">
         {items.map((item) => {
           const Icon = ICONS[item.icon];
           const active =
@@ -77,7 +77,7 @@ export function Sidebar() {
               onMouseEnter={() => prefetchNav(item.href)}
               onClick={() => setClicked(item.href)}
               className={cn(
-                "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium",
+                "flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium",
                 active || clicked === item.href
                   ? "bg-[#1f8f63] text-white shadow-lg shadow-emerald-950/40"
                   : "text-white/60 hover:bg-white/5 hover:text-white"

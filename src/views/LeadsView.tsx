@@ -37,7 +37,7 @@ export function LeadsView() {
 
         <section className="crm-panel overflow-visible p-0">
           {leads.length === 0 ? (
-            <div className="crm-table-shell flex items-center justify-center px-5 text-center text-sm text-white/45">
+            <div className="flex min-h-[140px] items-center justify-center px-5 text-center text-sm text-white/45">
               <div>
                 Aucun lead.
                 <div className="mt-4 flex justify-center">

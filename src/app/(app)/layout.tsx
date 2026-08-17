@@ -16,7 +16,7 @@ export default function AppLayout({
         </div>
         <RealtimeBridge />
         <Sidebar />
-        <div className="relative z-10 pl-64">
+        <div className="relative z-10 pl-60">
           <main className="min-h-screen">{children}</main>
         </div>
       </div>
