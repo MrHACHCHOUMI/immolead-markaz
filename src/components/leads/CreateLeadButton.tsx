@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Plus, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { invalidateCrm } from "@/lib/query-cache";
+import { recordVisitFromLead } from "@/lib/record-visit";
 
 export type ProjectOption = { id: string; name: string };
 
@@ -134,6 +135,19 @@ export function CreateLeadButton({ projects }: { projects: ProjectOption[] }) {
           description: `RDV planifié le ${rdv_date} à ${rdv_time}`,
           metadata: { appointment_date: appointmentDate },
         });
+      } else if (leadStatus === "visite" || leadStatus === "non_visite") {
+        try {
+          await recordVisitFromLead({
+            supabase,
+            userId: user.id,
+            leadId: lead.id,
+            projectId: project_id,
+            status: leadStatus,
+            comment: last_comment,
+          });
+        } catch (visitErr) {
+          console.warn("Visite non enregistrée (table visits):", visitErr);
+        }
       }
 
       setOpen(false);
@@ -268,6 +282,8 @@ export function CreateLeadButton({ projects }: { projects: ProjectOption[] }) {
                           <option value="a_appeler">À appeler</option>
                           <option value="rappel">Rappel</option>
                           <option value="qualifie">Qualifié</option>
+                          <option value="visite">Visité</option>
+                          <option value="non_visite">Pas venu</option>
                           <option value="non_qualifie">Non qualifié</option>
                         </select>
                       </label>

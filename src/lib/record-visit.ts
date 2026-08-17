@@ -10,7 +10,7 @@ type RecordVisitInput = {
   comment?: string | null;
 };
 
-/** Crée ou met à jour la visite liée au lead (avec ou sans RDV). */
+/** Crée ou met à jour la visite liée au lead — avec ou sans date de RDV. */
 export async function recordVisitFromLead({
   supabase,
   userId,
@@ -19,21 +19,28 @@ export async function recordVisitFromLead({
   status,
   comment,
 }: RecordVisitInput) {
+  let pid = projectId;
+  if (!pid) {
+    const { data: lead } = await supabase
+      .from("leads")
+      .select("project_id")
+      .eq("id", leadId)
+      .maybeSingle();
+    pid = (lead?.project_id as string | undefined) ?? "";
+  }
+  if (!pid) return;
+
+  let appointmentId: string | null = null;
   const { data: appts } = await supabase
     .from("appointments")
     .select("id")
     .eq("lead_id", leadId)
     .order("appointment_date", { ascending: false })
     .limit(1);
-
-  const appointmentId = (appts?.[0]?.id as string | undefined) ?? null;
+  appointmentId = (appts?.[0]?.id as string | undefined) ?? null;
 
   if (appointmentId) {
-    const { error: apptErr } = await supabase
-      .from("appointments")
-      .update({ status })
-      .eq("id", appointmentId);
-    if (apptErr) throw apptErr;
+    await supabase.from("appointments").update({ status }).eq("id", appointmentId);
   }
 
   const { data: existing } = await supabase
@@ -44,29 +51,23 @@ export async function recordVisitFromLead({
     .limit(1);
 
   const existingId = existing?.[0]?.id as string | undefined;
+  const payload = {
+    status,
+    comment: comment || null,
+    commercial_id: userId,
+    project_id: pid,
+    appointment_id: appointmentId,
+  };
 
   if (existingId) {
-    const { error } = await supabase
-      .from("visits")
-      .update({
-        status,
-        comment: comment || null,
-        commercial_id: userId,
-        project_id: projectId,
-        appointment_id: appointmentId,
-      })
-      .eq("id", existingId);
+    const { error } = await supabase.from("visits").update(payload).eq("id", existingId);
     if (error) throw error;
     return;
   }
 
   const { error } = await supabase.from("visits").insert({
-    appointment_id: appointmentId,
+    ...payload,
     lead_id: leadId,
-    project_id: projectId,
-    commercial_id: userId,
-    status,
-    comment: comment || null,
   });
   if (error) throw error;
 }

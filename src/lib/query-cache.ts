@@ -3,6 +3,7 @@ type Entry = { data: unknown; at: number };
 const store = new Map<string, Entry>();
 const TTL_MS = 60_000;
 const EVENT = "crm:data";
+let epoch = 0;
 
 export function getCached<T>(key: string): T | undefined {
   const entry = store.get(key);
@@ -19,6 +20,7 @@ export function setCached<T>(key: string, data: T) {
 }
 
 export function invalidateCrm(prefix?: string) {
+  epoch += 1;
   if (!prefix) {
     store.clear();
   } else {
@@ -47,7 +49,13 @@ export async function cachedQuery<T>(
   if (existing && Date.now() - existing.at <= limit) {
     return existing.data as T;
   }
+  const started = epoch;
   const data = await loader();
+  if (started !== epoch) {
+    const latest = store.get(key);
+    if (latest) return latest.data as T;
+    return data;
+  }
   setCached(key, data);
   return data;
 }

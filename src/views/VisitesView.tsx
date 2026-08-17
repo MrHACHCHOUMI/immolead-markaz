@@ -70,7 +70,7 @@ export function VisitesView() {
             <div className="crm-table-shell flex items-center justify-center px-5 text-center text-sm text-white/45">
               Aucun lead visité pour le moment.
               <br />
-              Qualifie un lead en « Visité » depuis Leads.
+              Qualifie un lead en « Visité » depuis Leads — même sans date de RDV.
             </div>
           ) : (
             <div className="crm-table-shell overflow-x-auto">
@@ -89,10 +89,12 @@ export function VisitesView() {
                   {rows.map((visit) => (
                     <tr key={visit.id} className="hover:bg-white/[0.03]">
                       <td className="px-4 py-3 text-white/70">
-                        {new Date(visit.created_at).toLocaleString("fr-FR", {
-                          dateStyle: "short",
-                          timeStyle: "short",
-                        })}
+                        {visit.next_action_date
+                          ? new Date(visit.next_action_date).toLocaleString("fr-FR", {
+                              dateStyle: "short",
+                              timeStyle: "short",
+                            })
+                          : "Sans date"}
                       </td>
                       <td className="px-4 py-3 font-medium text-white">
                         <Link

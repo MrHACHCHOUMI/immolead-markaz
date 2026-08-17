@@ -1,10 +1,7 @@
-import { PageShell } from "@/components/layout/PageShell";
+"use client";
+
+import { VentesView } from "@/views/VentesView";
 
 export default function VentesPage() {
-  return (
-    <PageShell
-      title="Ventes"
-      subtitle="Volume immobilier vs CA commissions"
-    />
-  );
+  return <VentesView />;
 }

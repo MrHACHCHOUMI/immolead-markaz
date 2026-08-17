@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { invalidateCrm } from "@/lib/query-cache";
 
 /** Temps réel WebSocket — ne doit jamais faire planter l’app. */
 export function RealtimeBridge() {
@@ -16,19 +17,14 @@ export function RealtimeBridge() {
           "postgres_changes",
           { event: "*", schema: "public", table: "leads" },
           () => {
-            // soft refresh
-            if (typeof window !== "undefined") {
-              window.dispatchEvent(new Event("crm:realtime"));
-            }
+            invalidateCrm();
           }
         )
         .on(
           "postgres_changes",
           { event: "*", schema: "public", table: "notifications" },
           () => {
-            if (typeof window !== "undefined") {
-              window.dispatchEvent(new Event("crm:realtime"));
-            }
+            invalidateCrm();
           }
         )
         .subscribe();

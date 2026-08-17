@@ -22,7 +22,6 @@ export type NavItem = {
     | "layout-dashboard"
     | "building-2"
     | "users"
-    | "calendar"
     | "map-pin"
     | "home"
     | "badge-dollar-sign"
@@ -42,7 +41,6 @@ export function getNavForRole(role: UserRole): NavItem[] {
       { href: "/dashboard", label: "Dashboard", icon: "layout-dashboard" },
       { href: "/leads", label: "Mes leads", icon: "users" },
       { href: "/appels", label: "Mes appels", icon: "phone" },
-      { href: "/agenda", label: "Agenda", icon: "calendar" },
       { href: "/rdv", label: "Mes RDV", icon: "clipboard-list" },
     ];
   }
@@ -51,7 +49,6 @@ export function getNavForRole(role: UserRole): NavItem[] {
     return [
       { href: "/dashboard", label: "Dashboard", icon: "layout-dashboard" },
       { href: "/visiteurs", label: "Mes visiteurs", icon: "user-round" },
-      { href: "/agenda", label: "Agenda", icon: "calendar" },
       { href: "/prospects", label: "Prospects", icon: "users" },
       { href: "/biens", label: "Biens", icon: "home" },
       { href: "/ventes", label: "Mes ventes", icon: "badge-dollar-sign" },
@@ -64,7 +61,6 @@ export function getNavForRole(role: UserRole): NavItem[] {
     { href: "/biens", label: "Biens", icon: "home" },
     { href: "/projets", label: "Projets", icon: "building-2" },
     { href: "/leads", label: "Leads", icon: "users" },
-    { href: "/agenda", label: "Agenda", icon: "calendar" },
     { href: "/visites", label: "Visites", icon: "map-pin" },
     { href: "/ventes", label: "Ventes", icon: "badge-dollar-sign" },
     { href: "/depenses", label: "Dépenses", icon: "receipt" },
