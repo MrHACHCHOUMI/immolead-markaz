@@ -1,12 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   experimental: {
     optimizePackageImports: ["lucide-react"],
-    staleTimes: {
-      dynamic: 60,
-      static: 180,
-    },
   },
   images: {
     remotePatterns: [

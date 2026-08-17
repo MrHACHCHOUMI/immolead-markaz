@@ -48,7 +48,7 @@ export function useRealtimeRefresh(
     return () => {
       void supabase.removeChannel(channel);
     };
-  }, [tablesKey, filter, router]);
+  }, [tablesKey, filter]);
 }
 
 export function useUnreadNotifications(userId: string) {

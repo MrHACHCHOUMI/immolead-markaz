@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "set NODE_TLS_REJECT_UNAUTHORIZED=0&& next dev --turbopack",
-    "build": "set NODE_TLS_REJECT_UNAUTHORIZED=0&& next build",
-    "start": "set NODE_TLS_REJECT_UNAUTHORIZED=0&& next start",
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
     "lint": "eslint ."
   },
   "dependencies": {
