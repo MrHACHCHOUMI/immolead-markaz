@@ -51,7 +51,9 @@ export function Sidebar() {
     setClicked(null);
   }, [pathname]);
 
-  const items = user ? getNavForRole(user.role) : getNavForRole("super_admin");
+  const items = (user ? getNavForRole(user.role) : getNavForRole("super_admin")).filter(
+    (item) => item.href !== "/agenda"
+  );
 
   return (
     <aside className="fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-white/10 bg-[#071510]">

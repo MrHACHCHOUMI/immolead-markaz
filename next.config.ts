@@ -7,6 +7,9 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ["lucide-react"],
   },
+  async redirects() {
+    return [{ source: "/agenda", destination: "/dashboard", permanent: true }];
+  },
   images: {
     remotePatterns: [
       {
