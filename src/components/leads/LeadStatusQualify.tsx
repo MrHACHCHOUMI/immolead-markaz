@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { invalidateCrm } from "@/lib/query-cache";
 import { LEAD_STATUS_LABELS } from "@/lib/labels";
 import { calculateCommissionAmount } from "@/lib/utils";
+import { recordVisitFromLead } from "@/lib/record-visit";
 import type { LeadStatus, Unit } from "@/lib/types/database";
 
 type ProjectOption = { id: string; name: string };
@@ -118,26 +119,13 @@ export function LeadStatusQualify({
         .eq("id", leadId);
       if (upErr) throw upErr;
 
-      const { data: appts } = await supabase
-        .from("appointments")
-        .select("id")
-        .eq("lead_id", leadId)
-        .order("appointment_date", { ascending: false })
-        .limit(1);
-
-      const apptId = appts?.[0]?.id as string | undefined;
-      if (apptId && (next === "visite" || next === "non_visite")) {
-        await supabase
-          .from("appointments")
-          .update({ status: next === "visite" ? "visite" : "non_visite" })
-          .eq("id", apptId);
-
-        await supabase.from("visits").insert({
-          appointment_id: apptId,
-          lead_id: leadId,
-          project_id: projectId,
-          commercial_id: user.id,
-          status: next === "visite" ? "visite" : "non_visite",
+      if (next === "visite" || next === "non_visite") {
+        await recordVisitFromLead({
+          supabase,
+          userId: user.id,
+          leadId,
+          projectId,
+          status: next,
         });
       }
 
@@ -342,6 +330,9 @@ export function LeadStatusQualify({
         {LEAD_STATUS_LABELS[status] ?? status}
         <ChevronDown className="h-3 w-3" />
       </button>
+      {error ? (
+        <p className="mt-1 max-w-[180px] text-[11px] text-rose-300">{error}</p>
+      ) : null}
 
       {open && mounted
         ? createPortal(

@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { createClient } from "@/lib/supabase/client";
 import { invalidateCrm } from "@/lib/query-cache";
 import { calculateCommissionAmount } from "@/lib/utils";
+import { recordVisitFromLead } from "@/lib/record-visit";
 import type { Unit } from "@/lib/types/database";
 
 type ProjectOption = { id: string; name: string };
@@ -81,37 +82,15 @@ export function LeadCommercialActions({
         .eq("id", leadId);
       if (upErr) throw upErr;
 
-      // Maj RDV le plus récent si existe
-      const { data: appts } = await supabase
-        .from("appointments")
-        .select("id")
-        .eq("lead_id", leadId)
-        .order("appointment_date", { ascending: false })
-        .limit(1);
-
-      const apptId = appts?.[0]?.id as string | undefined;
-      if (apptId) {
-        const apptStatus =
-          status === "visite"
-            ? "visite"
-            : status === "non_visite"
-              ? "non_visite"
-              : "confirme";
-        await supabase
-          .from("appointments")
-          .update({ status: apptStatus })
-          .eq("id", apptId);
-
-        if (status === "visite" || status === "non_visite") {
-          await supabase.from("visits").insert({
-            appointment_id: apptId,
-            lead_id: leadId,
-            project_id: projectId,
-            commercial_id: user.id,
-            status: status === "visite" ? "visite" : "non_visite",
-            comment: comment || null,
-          });
-        }
+      if (status === "visite" || status === "non_visite") {
+        await recordVisitFromLead({
+          supabase,
+          userId: user.id,
+          leadId,
+          projectId,
+          status,
+          comment,
+        });
       }
 
       await supabase.from("activities").insert({

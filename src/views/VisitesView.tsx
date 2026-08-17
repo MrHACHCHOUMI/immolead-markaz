@@ -8,12 +8,12 @@ import { loadVisits } from "@/lib/queries";
 import { APPOINTMENT_STATUS_LABELS, INTEREST_LEVEL_LABELS } from "@/lib/labels";
 
 export function VisitesView() {
-  const { data: visits = [], loading } = useCachedQuery("visits", loadVisits);
+  const { data: visits = [], loading, error } = useCachedQuery("visits", loadVisits);
 
   if (loading) {
     return (
       <>
-        <Topbar title="Visites" subtitle="Historique des visites terrain" />
+        <Topbar title="Visites" subtitle="Leads visités et compte-rendus terrain" />
         <PageSkeleton />
       </>
     );
@@ -21,9 +21,15 @@ export function VisitesView() {
 
   return (
     <>
-      <Topbar title="Visites" subtitle="Historique des visites terrain" />
+      <Topbar title="Visites" subtitle="Leads visités et compte-rendus terrain" />
 
       <div className="space-y-4 p-6">
+        {error ? (
+          <div className="rounded-2xl border border-rose-400/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-100">
+            {error}
+          </div>
+        ) : null}
+
         <p className="text-sm text-white/50">
           {visits.length} visite{visits.length > 1 ? "s" : ""}
         </p>
