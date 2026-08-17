@@ -46,7 +46,7 @@ export function EquipeView() {
   if (loading) {
     return (
       <>
-        <Topbar title="Équipe" subtitle="CRC, commerciaux et affectation projet" />
+        <Topbar title="Équipe" subtitle="Admins, CRC, commerciaux et affectation projet" />
         <PageSkeleton />
       </>
     );
@@ -56,7 +56,7 @@ export function EquipeView() {
     <>
       <Topbar
         title="Équipe"
-        subtitle="CRC, commerciaux et affectation projet"
+        subtitle="Admins, CRC, commerciaux et affectation projet"
         actions={<CreateMemberButton projects={projects} />}
       />
 
@@ -74,8 +74,8 @@ export function EquipeView() {
         </div>
 
         <p className="text-sm text-white/50">
-          Chaque CRC ou commercial voit uniquement le projet qu’on lui assigne : leads,
-          visites et biens.
+          Un admin voit tout le CRM. Chaque CRC ou commercial voit uniquement le projet
+          qu’on lui assigne : leads, visites et biens.
         </p>
 
         <section className="crm-panel overflow-visible p-0">

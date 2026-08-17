@@ -7,8 +7,8 @@ type CreateMemberInput = {
   email: string;
   phone?: string;
   password: string;
-  role: Extract<UserRole, "crc" | "commercial">;
-  project_id: string;
+  role: Extract<UserRole, "admin" | "crc" | "commercial">;
+  project_id?: string;
 };
 
 export async function createTeamMember(input: CreateMemberInput) {
@@ -73,12 +73,14 @@ export async function createTeamMember(input: CreateMemberInput) {
     if (upErr) throw upErr;
   }
 
-  const { error: linkErr } = await supabase.from("project_users").insert({
-    project_id: input.project_id,
-    user_id: userId,
-    role: input.role,
-  });
-  if (linkErr && !linkErr.message.includes("duplicate")) throw linkErr;
+  if (input.role !== "admin" && input.project_id) {
+    const { error: linkErr } = await supabase.from("project_users").insert({
+      project_id: input.project_id,
+      user_id: userId,
+      role: input.role,
+    });
+    if (linkErr && !linkErr.message.includes("duplicate")) throw linkErr;
+  }
 
   return userId;
 }

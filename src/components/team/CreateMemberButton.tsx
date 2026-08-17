@@ -16,11 +16,13 @@ export function CreateMemberButton({ projects }: Props) {
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [role, setRole] = useState<"admin" | "crc" | "commercial">("crc");
 
   useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     if (!open) return;
+    setRole("crc");
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
@@ -37,11 +39,16 @@ export function CreateMemberButton({ projects }: Props) {
     const email = String(fd.get("email") ?? "").trim();
     const phone = String(fd.get("phone") ?? "").trim();
     const password = String(fd.get("password") ?? "");
-    const role = String(fd.get("role") ?? "crc") as "crc" | "commercial";
+    const role = String(fd.get("role") ?? "crc") as "admin" | "crc" | "commercial";
     const project_id = String(fd.get("project_id") ?? "");
 
-    if (!full_name || !email || !password || !project_id) {
-      setError("Nom, email, mot de passe et projet sont obligatoires.");
+    if (!full_name || !email || !password) {
+      setError("Nom, email et mot de passe sont obligatoires.");
+      setLoading(false);
+      return;
+    }
+    if (role !== "admin" && !project_id) {
+      setError("Assigne un projet au CRC ou au commercial.");
       setLoading(false);
       return;
     }
@@ -58,7 +65,7 @@ export function CreateMemberButton({ projects }: Props) {
         phone,
         password,
         role,
-        project_id,
+        project_id: role === "admin" ? undefined : project_id,
       });
       invalidateCrm();
       setOpen(false);
@@ -91,7 +98,7 @@ export function CreateMemberButton({ projects }: Props) {
                       Nouvel agent
                     </h3>
                     <p className="mt-0.5 text-xs text-white/45">
-                      CRC ou commercial, rattaché à un projet
+                      Admin, CRC ou commercial
                     </p>
                   </div>
                   <button
@@ -136,29 +143,43 @@ export function CreateMemberButton({ projects }: Props) {
                   <div className="grid gap-3 sm:grid-cols-2">
                     <label className="text-sm text-white/70">
                       Rôle *
-                      <select name="role" className="crm-input mt-1" defaultValue="crc">
+                      <select
+                        name="role"
+                        className="crm-input mt-1"
+                        value={role}
+                        onChange={(e) =>
+                          setRole(e.target.value as "admin" | "crc" | "commercial")
+                        }
+                      >
                         <option value="crc">CRC</option>
                         <option value="commercial">Commercial</option>
+                        <option value="admin">Admin</option>
                       </select>
                     </label>
-                    <label className="text-sm text-white/70">
-                      Projet assigné *
-                      <select
-                        name="project_id"
-                        required
-                        className="crm-input mt-1"
-                        defaultValue=""
-                      >
-                        <option value="" disabled>
-                          Choisir un projet
-                        </option>
-                        {projects.map((p) => (
-                          <option key={p.id} value={p.id}>
-                            {p.name}
+                    {role === "admin" ? (
+                      <p className="self-end text-xs text-white/45">
+                        Un admin voit tous les projets, sans affectation.
+                      </p>
+                    ) : (
+                      <label className="text-sm text-white/70">
+                        Projet assigné *
+                        <select
+                          name="project_id"
+                          required
+                          className="crm-input mt-1"
+                          defaultValue=""
+                        >
+                          <option value="" disabled>
+                            Choisir un projet
                           </option>
-                        ))}
-                      </select>
-                    </label>
+                          {projects.map((p) => (
+                            <option key={p.id} value={p.id}>
+                              {p.name}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                    )}
                   </div>
                   {error ? (
                     <div className="rounded-xl border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-100">
