@@ -7,6 +7,7 @@ import { PageSkeleton } from "@/components/ui/PageSkeleton";
 import { useCachedQuery } from "@/hooks/useCachedQuery";
 import { loadVisits } from "@/lib/queries";
 import { LEAD_STATUS_LABELS } from "@/lib/labels";
+import type { LeadStatus } from "@/lib/types/database";
 
 export function VisitesView() {
   const { data: visits = [], loading, error } = useCachedQuery("visits", loadVisits);
@@ -115,7 +116,8 @@ export function VisitesView() {
                       </td>
                       <td className="px-4 py-3">
                         <span className="rounded-full bg-[#1f8f63]/15 px-2.5 py-0.5 text-xs text-[#7ddea8]">
-                          {LEAD_STATUS_LABELS[visit.status] ?? visit.status}
+                          {LEAD_STATUS_LABELS[visit.status as LeadStatus] ??
+                            visit.status}
                         </span>
                       </td>
                       <td className="max-w-[240px] truncate px-4 py-3 text-white/50">

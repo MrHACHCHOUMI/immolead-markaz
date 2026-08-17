@@ -100,23 +100,7 @@ export function loadVisits() {
     const fields =
       "id, first_name, last_name, phone, project_id, status, last_comment, next_action_at, updated_at, created_at";
 
-    let { data, error } = await sb()
-      .from("leads")
-      .select(`${fields}, projects(id, name)`)
-      .in("status", ["visite", "non_visite"])
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      const retry = await sb()
-        .from("leads")
-        .select(fields)
-        .in("status", ["visite", "non_visite"])
-        .order("created_at", { ascending: false });
-      if (retry.error) throw retry.error;
-      data = retry.data;
-    }
-
-    return ((data ?? []) as Array<{
+    type VisitLeadRow = {
       id: string;
       first_name: string;
       last_name: string;
@@ -128,7 +112,27 @@ export function loadVisits() {
       updated_at: string | null;
       created_at: string;
       projects?: { id: string; name: string } | { id: string; name: string }[] | null;
-    }>).map((lead) => {
+    };
+
+    const first = await sb()
+      .from("leads")
+      .select(`${fields}, projects(id, name)`)
+      .in("status", ["visite", "non_visite"])
+      .order("created_at", { ascending: false });
+
+    let rows: VisitLeadRow[] = (first.data ?? []) as VisitLeadRow[];
+
+    if (first.error) {
+      const retry = await sb()
+        .from("leads")
+        .select(fields)
+        .in("status", ["visite", "non_visite"])
+        .order("created_at", { ascending: false });
+      if (retry.error) throw retry.error;
+      rows = (retry.data ?? []) as VisitLeadRow[];
+    }
+
+    return rows.map((lead) => {
       const project = Array.isArray(lead.projects)
         ? lead.projects[0] ?? null
         : lead.projects ?? null;
