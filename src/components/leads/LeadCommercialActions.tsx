@@ -83,14 +83,18 @@ export function LeadCommercialActions({
       if (upErr) throw upErr;
 
       if (status === "visite" || status === "non_visite") {
-        await recordVisitFromLead({
-          supabase,
-          userId: user.id,
-          leadId,
-          projectId,
-          status,
-          comment,
-        });
+        try {
+          await recordVisitFromLead({
+            supabase,
+            userId: user.id,
+            leadId,
+            projectId,
+            status,
+            comment,
+          });
+        } catch (visitErr) {
+          console.warn("Visite non enregistrée (table visits):", visitErr);
+        }
       }
 
       await supabase.from("activities").insert({

@@ -90,28 +90,17 @@ export function loadLeads() {
 
 export function loadVisits() {
   return cachedQuery("visits", async () => {
-    const client = sb();
-    const [{ data, error }, { data: leadRows, error: leadErr }] = await Promise.all([
-      client
-        .from("visits")
-        .select(
-          "*, leads(first_name, last_name, phone), projects(id, name), users:commercial_id(full_name)"
-        )
-        .order("created_at", { ascending: false }),
-      client
-        .from("leads")
-        .select("id, first_name, last_name, phone, project_id, status, last_comment, updated_at, created_at, projects(id, name)")
-        .in("status", ["visite", "non_visite"])
-        .order("updated_at", { ascending: false }),
-    ]);
+    const { data, error } = await sb()
+      .from("leads")
+      .select(
+        "id, first_name, last_name, phone, project_id, status, last_comment, updated_at, created_at, projects(id, name)"
+      )
+      .in("status", ["visite", "non_visite"])
+      .order("updated_at", { ascending: false });
 
     if (error) throw error;
-    if (leadErr) throw leadErr;
 
-    const visits = (data ?? []) as VisitRow[];
-    const seen = new Set(visits.map((v) => v.lead_id));
-
-    const fromLeads = ((leadRows ?? []) as Array<{
+    return ((data ?? []) as Array<{
       id: string;
       first_name: string;
       last_name: string;
@@ -122,37 +111,31 @@ export function loadVisits() {
       updated_at: string;
       created_at: string;
       projects: { id: string; name: string } | null;
-    }>)
-      .filter((lead) => !seen.has(lead.id))
-      .map(
-        (lead) =>
-          ({
-            id: `lead-${lead.id}`,
-            appointment_id: null,
-            lead_id: lead.id,
-            project_id: lead.project_id,
-            commercial_id: "",
-            status: lead.status,
-            interest_level: null,
-            budget: null,
-            property_type: null,
-            lot_id: null,
-            comment: lead.last_comment,
-            next_action_date: null,
-            created_at: lead.updated_at || lead.created_at,
-            updated_at: lead.updated_at || lead.created_at,
-            leads: {
-              first_name: lead.first_name,
-              last_name: lead.last_name,
-              phone: lead.phone,
-            },
-            projects: lead.projects,
-            users: null,
-          }) as VisitRow
-      );
-
-    return [...visits, ...fromLeads].sort(
-      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    }>).map(
+      (lead) =>
+        ({
+          id: lead.id,
+          appointment_id: null,
+          lead_id: lead.id,
+          project_id: lead.project_id,
+          commercial_id: "",
+          status: lead.status,
+          interest_level: null,
+          budget: null,
+          property_type: null,
+          lot_id: null,
+          comment: lead.last_comment,
+          next_action_date: null,
+          created_at: lead.updated_at || lead.created_at,
+          updated_at: lead.updated_at || lead.created_at,
+          leads: {
+            first_name: lead.first_name,
+            last_name: lead.last_name,
+            phone: lead.phone,
+          },
+          projects: lead.projects,
+          users: null,
+        }) as VisitRow
     );
   });
 }

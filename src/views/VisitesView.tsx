@@ -1,19 +1,26 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Topbar } from "@/components/layout/Topbar";
 import { PageSkeleton } from "@/components/ui/PageSkeleton";
 import { useCachedQuery } from "@/hooks/useCachedQuery";
 import { loadVisits } from "@/lib/queries";
-import { APPOINTMENT_STATUS_LABELS, INTEREST_LEVEL_LABELS } from "@/lib/labels";
+import { LEAD_STATUS_LABELS } from "@/lib/labels";
 
 export function VisitesView() {
   const { data: visits = [], loading, error } = useCachedQuery("visits", loadVisits);
+  const [filter, setFilter] = useState<"visite" | "non_visite" | "all">("visite");
+
+  const rows = useMemo(() => {
+    if (filter === "all") return visits;
+    return visits.filter((v) => v.status === filter);
+  }, [visits, filter]);
 
   if (loading) {
     return (
       <>
-        <Topbar title="Visites" subtitle="Leads visités et compte-rendus terrain" />
+        <Topbar title="Visites" subtitle="Leads qualifiés Visité" />
         <PageSkeleton />
       </>
     );
@@ -21,7 +28,7 @@ export function VisitesView() {
 
   return (
     <>
-      <Topbar title="Visites" subtitle="Leads visités et compte-rendus terrain" />
+      <Topbar title="Visites" subtitle="Leads qualifiés Visité" />
 
       <div className="space-y-4 p-6">
         {error ? (
@@ -30,14 +37,40 @@ export function VisitesView() {
           </div>
         ) : null}
 
-        <p className="text-sm text-white/50">
-          {visits.length} visite{visits.length > 1 ? "s" : ""}
-        </p>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm text-white/50">
+            {rows.length} visiteur{rows.length > 1 ? "s" : ""}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {(
+              [
+                { id: "visite", label: "Visité" },
+                { id: "non_visite", label: "Pas venu" },
+                { id: "all", label: "Tous" },
+              ] as const
+            ).map((opt) => (
+              <button
+                key={opt.id}
+                type="button"
+                onClick={() => setFilter(opt.id)}
+                className={
+                  filter === opt.id
+                    ? "rounded-full bg-[#1f8f63] px-3 py-1.5 text-xs font-medium text-white"
+                    : "rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white/60 hover:text-white"
+                }
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
 
         <section className="crm-panel overflow-visible p-0">
-          {visits.length === 0 ? (
+          {rows.length === 0 ? (
             <div className="crm-table-shell flex items-center justify-center px-5 text-center text-sm text-white/45">
-              Aucune visite enregistrée.
+              Aucun lead visité pour le moment.
+              <br />
+              Qualifie un lead en « Visité » depuis Leads.
             </div>
           ) : (
             <div className="crm-table-shell overflow-x-auto">
@@ -46,15 +79,14 @@ export function VisitesView() {
                   <tr>
                     <th className="px-4 py-3 font-medium">Date</th>
                     <th className="px-4 py-3 font-medium">Visiteur</th>
+                    <th className="px-4 py-3 font-medium">Téléphone</th>
                     <th className="px-4 py-3 font-medium">Projet</th>
-                    <th className="px-4 py-3 font-medium">Commercial</th>
                     <th className="px-4 py-3 font-medium">Statut</th>
-                    <th className="px-4 py-3 font-medium">Intérêt</th>
                     <th className="px-4 py-3 font-medium">Commentaire</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
-                  {visits.map((visit) => (
+                  {rows.map((visit) => (
                     <tr key={visit.id} className="hover:bg-white/[0.03]">
                       <td className="px-4 py-3 text-white/70">
                         {new Date(visit.created_at).toLocaleString("fr-FR", {
@@ -63,29 +95,23 @@ export function VisitesView() {
                         })}
                       </td>
                       <td className="px-4 py-3 font-medium text-white">
-                        {visit.leads ? (
-                          <Link href={`/leads/${visit.lead_id}`} className="hover:text-[#7ddea8]">
-                            {visit.leads.first_name} {visit.leads.last_name}
-                          </Link>
-                        ) : (
-                          "—"
-                        )}
+                        <Link
+                          href={`/leads/${visit.lead_id}`}
+                          className="hover:text-[#7ddea8]"
+                        >
+                          {visit.leads?.first_name} {visit.leads?.last_name}
+                        </Link>
+                      </td>
+                      <td className="px-4 py-3 text-white/70">
+                        {visit.leads?.phone ?? "—"}
                       </td>
                       <td className="px-4 py-3 text-[#7ddea8]">
                         {visit.projects?.name ?? "—"}
                       </td>
-                      <td className="px-4 py-3 text-white/70">
-                        {visit.users?.full_name ?? "—"}
-                      </td>
                       <td className="px-4 py-3">
                         <span className="rounded-full bg-[#1f8f63]/15 px-2.5 py-0.5 text-xs text-[#7ddea8]">
-                          {APPOINTMENT_STATUS_LABELS[visit.status] ?? visit.status}
+                          {LEAD_STATUS_LABELS[visit.status] ?? visit.status}
                         </span>
-                      </td>
-                      <td className="px-4 py-3 text-white/70">
-                        {visit.interest_level
-                          ? INTEREST_LEVEL_LABELS[visit.interest_level]
-                          : "—"}
                       </td>
                       <td className="max-w-[240px] truncate px-4 py-3 text-white/50">
                         {visit.comment ?? "—"}

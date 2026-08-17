@@ -120,13 +120,17 @@ export function LeadStatusQualify({
       if (upErr) throw upErr;
 
       if (next === "visite" || next === "non_visite") {
-        await recordVisitFromLead({
-          supabase,
-          userId: user.id,
-          leadId,
-          projectId,
-          status: next,
-        });
+        try {
+          await recordVisitFromLead({
+            supabase,
+            userId: user.id,
+            leadId,
+            projectId,
+            status: next,
+          });
+        } catch (visitErr) {
+          console.warn("Visite non enregistrée (table visits):", visitErr);
+        }
       }
 
       await supabase.from("activities").insert({
