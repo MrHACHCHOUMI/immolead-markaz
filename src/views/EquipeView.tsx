@@ -68,9 +68,10 @@ export function EquipeView() {
         ) : null}
 
         <div className="rounded-2xl border border-[#d7b56d]/25 bg-[#d7b56d]/10 px-4 py-3 text-sm text-[#f0e2b8]">
-          Pour que chaque agent ne voie que son projet, exécute{" "}
-          <span className="font-semibold">supabase/FIX_team_access.sql</span> dans
-          Supabase → SQL Editor.
+          Les comptes créés ici sont prêts à se connecter (email déjà confirmé). Si la
+          création échoue, vérifie la variable{" "}
+          <span className="font-semibold">SUPABASE_SERVICE_ROLE_KEY</span> dans
+          .env.local et Vercel.
         </div>
 
         <p className="text-sm text-white/50">

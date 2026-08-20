@@ -1,4 +1,3 @@
-import { createClient as createAuthClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
 import type { UserRole } from "@/lib/types/database";
 
@@ -12,77 +11,43 @@ type CreateMemberInput = {
 };
 
 export async function createTeamMember(input: CreateMemberInput) {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !key) throw new Error("Configuration Supabase manquante.");
-
-  const isolated = createAuthClient(url, key, {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-      detectSessionInUrl: false,
-    },
-  });
-
-  const { data, error } = await isolated.auth.signUp({
-    email: input.email.trim().toLowerCase(),
-    password: input.password,
-    options: {
-      data: {
-        full_name: input.full_name,
-        role: input.role,
-      },
-    },
-  });
-
-  if (error) throw error;
-  const userId = data.user?.id;
-  if (!userId) {
-    throw new Error(
-      "Compte créé, mais confirmation email requise. Désactive « Confirm email » dans Supabase Auth."
-    );
-  }
-
   const supabase = createClient();
-  const { data: existing } = await supabase
-    .from("users")
-    .select("id")
-    .eq("id", userId)
-    .maybeSingle();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
 
-  if (!existing) {
-    const { error: insertErr } = await supabase.from("users").insert({
-      id: userId,
-      email: input.email.trim().toLowerCase(),
+  if (!session?.access_token) {
+    throw new Error("Session expirée. Reconnecte-toi.");
+  }
+
+  const res = await fetch("/api/team/create", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${session.access_token}`,
+    },
+    body: JSON.stringify({
       full_name: input.full_name,
-      phone: input.phone || null,
+      email: input.email,
+      phone: input.phone,
+      password: input.password,
       role: input.role,
-      active: true,
-    });
-    if (insertErr && !insertErr.message.includes("duplicate")) throw insertErr;
-  } else {
-    const { error: upErr } = await supabase
-      .from("users")
-      .update({
-        full_name: input.full_name,
-        phone: input.phone || null,
-        role: input.role,
-        active: true,
-      })
-      .eq("id", userId);
-    if (upErr) throw upErr;
-  }
-
-  if (input.role !== "admin" && input.project_id) {
-    const { error: linkErr } = await supabase.from("project_users").insert({
       project_id: input.project_id,
-      user_id: userId,
-      role: input.role,
-    });
-    if (linkErr && !linkErr.message.includes("duplicate")) throw linkErr;
-  }
+    }),
+  });
 
-  return userId;
+  const payload = (await res.json().catch(() => ({}))) as {
+    id?: string;
+    error?: string;
+  };
+
+  if (!res.ok) {
+    throw new Error(payload.error || "Création impossible");
+  }
+  if (!payload.id) {
+    throw new Error("Compte créé sans identifiant.");
+  }
+  return payload.id;
 }
 
 export async function assignMemberProject(
